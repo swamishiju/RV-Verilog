@@ -1,34 +1,91 @@
-NAME ?= alu
-TOP  := $(NAME)
+VERILATOR ?= verilator
 
-VERILATOR := verilator
-OBJ_DIR   := obj_dir
-SIM       := $(OBJ_DIR)/V$(TOP)
+TARGET ?= core
 
-SV_SRC    := $(TOP).sv
-TB_SRC    := t_$(TOP).cpp
+RTL_DIR := rtl
+TB_DIR  := sim/cpp
 
-.PHONY: all run clean lint
+OBJ_DIR := build/$(TARGET)
+SIM     := $(OBJ_DIR)/V$(TARGET)
 
-all: $(SIM)
+RTL_SRCS := $(shell find $(RTL_DIR) -name "*.sv")
+TB_SRC   := $(TB_DIR)/t_$(TARGET).cpp
 
-$(SIM): $(SV_SRC) $(TB_SRC)
+VERILATOR_FLAGS := \
+	--cc \
+	--exe \
+	--build \
+	--trace-fst \
+	--timing \
+	-Wall \
+	--Mdir $(OBJ_DIR)
+
+.PHONY: all
+all: test
+
+# Build
+$(SIM): $(RTL_SRCS) $(TB_SRC)
+	@mkdir -p build
 	$(VERILATOR) \
-		--cc \
-		--exe \
-		--trace \
-		--timing \
-		-Wall \
-		$(SV_SRC) \
+		$(VERILATOR_FLAGS) \
+		-CFLAGS "-Ibuild" \
+		--top-module $(TARGET) \
+		$(RTL_SRCS) \
 		$(TB_SRC)
-	$(MAKE) -C $(OBJ_DIR) -f V$(TOP).mk V$(TOP)
 
+.PHONY: build
+build: $(SIM)
+
+# Run
+.PHONY: run
 run: $(SIM)
 	./$(SIM)
 
+# Test
+.PHONY: test
+test: run
+
+# Lint
+.PHONY: lint
 lint:
-	$(VERILATOR) --lint-only -Wall $(SV_SRC)
+	$(VERILATOR) \
+		--lint-only \
+		-Wall \
+		--top-module $(TARGET) \
+		$(RTL_SRCS)
 
+# Waveforms
+.PHONY: waves
+waves:
+	gtkwave *.fst
+
+# Convenience Targets
+.PHONY: alu
+alu:
+	$(MAKE) test TARGET=alu
+
+.PHONY: reg_file
+reg_file:
+	$(MAKE) test TARGET=reg_file
+
+.PHONY: booth_mul
+booth_mul:
+	$(MAKE) test TARGET=booth_mul
+
+.PHONY: core
+core:
+	$(MAKE) test TARGET=core
+
+# Regression
+.PHONY: regression
+regression:
+	$(MAKE) test TARGET=alu
+	$(MAKE) test TARGET=reg_file
+	$(MAKE) test TARGET=booth_mul
+	$(MAKE) test TARGET=core
+
+# Cleanup
+.PHONY: clean
 clean:
-	rm -rf $(OBJ_DIR) *.vcd
-
+	rm -rf build
+	rm -f *.fst *.vcd

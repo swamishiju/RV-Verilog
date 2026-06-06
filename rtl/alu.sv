@@ -1,14 +1,14 @@
 `default_nettype none
 
 module alu(
-    input  wire [31:0] a,
-    input  wire [31:0] b,
-    input  wire [1:0] ALU_Select,
-    output wire [31:0] out,
-    output wire Z, N, V, C
+    input  logic [31:0] a,
+    input  logic [31:0] b,
+    input  logic [1:0]  ALU_Select,
+    output logic [31:0] out,
+    output logic        Z, N, V, C
 );
-    wire[31:0] out_and, out_or, sum;
-    wire cout;
+    logic [31:0] out_and, out_or, sum;
+    logic        cout;
 
     assign out_and = a & b;
     assign out_or  = a | b;
