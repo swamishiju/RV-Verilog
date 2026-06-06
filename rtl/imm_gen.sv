@@ -1,3 +1,5 @@
+`default_nettype none
+
 typedef enum logic [2:0] {
     IMM_I = 3'd0,
     IMM_S = 3'd1,
