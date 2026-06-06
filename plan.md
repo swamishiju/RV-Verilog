@@ -20,19 +20,19 @@
 
 ## Repository Setup
 
-* [ ] Create RTL directory structure
-* [ ] Create simulation directory structure
-* [ ] Create build directory
+* [x] Create RTL directory structure
+* [x] Create simulation directory structure
+* [x] Create build directory
 * [ ] Create common package file (`rv32_pkg.sv`)
 * [ ] Create top-level Makefile
 
 ## Build System
 
-* [-] Verilator build target
-* [-] Lint target
-* [-] Waveform generation
-* [-] Regression target
-* [-] Automatic source discovery
+* [x] Verilator build target
+* [x] Lint target
+* [x] Waveform generation
+* [x] Regression target
+* [x] Automatic source discovery
 * [ ] Improve testing framework
 
 ---
@@ -43,11 +43,11 @@
 
 ### Operations
 
-* [-] ADD
-* [-] SUB
-* [-] AND
-* [-] OR
-* [ ] XOR
+* [x] ADD
+* [x] SUB
+* [x] AND
+* [x] OR
+* [x] XOR
 * [ ] SLL
 * [ ] SRL
 * [ ] SRA
@@ -60,16 +60,10 @@
 
 ### Features
 
-* [ ] 32 registers
-* [ ] x0 hardwired to zero
-* [ ] Dual read ports
-* [ ] Single write port
-
-### Verification
-
-* [ ] x0 write protection
-* [ ] Read-after-write behavior
-* [ ] Randomized access testing
+* [x] 32 registers
+* [x] x0 hardwired to zero
+* [x] Dual read ports
+* [x] Single write port
 
 ---
 
@@ -77,16 +71,11 @@
 
 ### Types
 
-* [ ] I-type
-* [ ] S-type
-* [ ] B-type
-* [ ] U-type
-* [ ] J-type
-
-### Verification
-
-* [ ] Directed decode tests
-* [ ] Random instruction tests
+* [x] I-type
+* [x] S-type
+* [x] B-type
+* [x] U-type
+* [x] J-type
 
 ---
 

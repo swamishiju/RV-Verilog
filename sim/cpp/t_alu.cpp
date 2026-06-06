@@ -14,20 +14,28 @@ struct AluResult {
     bool v;
 };
 
-enum AluOp { ALU_ADD = 0, ALU_SUB = 1, ALU_AND = 2, ALU_OR = 3 };
-constexpr std::array<AluOp, 10> ALL_ALU_OPS = {
-    AluOp::ALU_ADD,
-    AluOp::ALU_SUB,
-    AluOp::ALU_AND,
-    AluOp::ALU_OR,
+enum AluOp {
+    ALU_ADD = 0,
+    ALU_SUB = 1,
+    ALU_AND = 2,
+    ALU_OR = 3,
+    ALU_XOR = 4,
+    ALU_SLL = 5,
+    ALU_SRL = 6,
+    ALU_SRA = 7,
+    ALU_SLT = 8,
+    ALU_SLTU = 9
 };
+constexpr std::array<AluOp, 10> ALL_ALU_OPS = {
+    AluOp::ALU_ADD, AluOp::ALU_SUB, AluOp::ALU_AND, AluOp::ALU_OR,  AluOp::ALU_XOR,
+    AluOp::ALU_SLL, AluOp::ALU_SRL, AluOp::ALU_SRA, AluOp::ALU_SLT, AluOp::ALU_SLTU};
 
-static void fail(AluOp op, uint32_t a, uint32_t b, const char* field, uint32_t expected,
-                 uint32_t actual);
+void fail(AluOp op, uint32_t a, uint32_t b, const char* field, uint32_t expected, uint32_t actual);
 AluResult ref_add(uint32_t a, uint32_t b);
 AluResult ref_sub(uint32_t a, uint32_t b);
 AluResult ref_and(uint32_t a, uint32_t b);
 AluResult ref_or(uint32_t a, uint32_t b);
+AluResult ref_xor(uint32_t a, uint32_t b);
 void check(Valu* dut, uint32_t a, uint32_t b, AluOp op);
 
 int main(int argc, char** argv) {
@@ -88,6 +96,36 @@ AluResult ref_or(uint32_t a, uint32_t b) {
     return {.result = res, .z = (res == 0), .n = (res >> 31), .c = 0, .v = 0};
 }
 
+AluResult ref_xor(uint32_t a, uint32_t b) {
+    uint32_t res = a ^ b;
+    return {.result = res, .z = (res == 0), .n = (res >> 31), .c = 0, .v = 0};
+}
+
+AluResult ref_sll(uint32_t a, uint32_t b) {
+    uint32_t res = a << (b & 0x1F);
+    return {.result = res, .z = (res == 0), .n = (res >> 31), .c = 0, .v = 0};
+}
+
+AluResult ref_srl(uint32_t a, uint32_t b) {
+    uint32_t res = a >> (b & 0x1F);
+    return {.result = res, .z = (res == 0), .n = (res >> 31), .c = 0, .v = 0};
+}
+
+AluResult ref_sra(uint32_t a, uint32_t b) {
+    uint32_t res = static_cast<uint32_t>(static_cast<int32_t>(a) >> (b & 0x1F));
+    return {.result = res, .z = (res == 0), .n = (res >> 31), .c = 0, .v = 0};
+}
+
+AluResult ref_slt(uint32_t a, uint32_t b) {
+    uint32_t res = (static_cast<int32_t>(a) < static_cast<int32_t>(b)) ? 1 : 0;
+    return {.result = res, .z = (res == 0), .n = 0, .c = 0, .v = 0};
+}
+
+AluResult ref_sltu(uint32_t a, uint32_t b) {
+    uint32_t res = (a < b) ? 1 : 0;
+    return {.result = res, .z = (res == 0), .n = 0, .c = 0, .v = 0};
+}
+
 void check(Valu* dut, uint32_t a, uint32_t b, AluOp op) {
     AluResult ref;
 
@@ -108,8 +146,33 @@ void check(Valu* dut, uint32_t a, uint32_t b, AluOp op) {
         ref = ref_or(a, b);
         break;
 
+    case AluOp::ALU_XOR:
+        ref = ref_xor(a, b);
+        break;
+
+    case AluOp::ALU_SLL:
+        ref = ref_sll(a, b);
+        break;
+
+    case AluOp::ALU_SRL:
+        ref = ref_srl(a, b);
+        break;
+
+    case AluOp::ALU_SRA:
+        ref = ref_sra(a, b);
+        break;
+
+    case AluOp::ALU_SLT:
+        ref = ref_slt(a, b);
+        break;
+
+    case AluOp::ALU_SLTU:
+        ref = ref_sltu(a, b);
+        break;
+
     default:
-        throw std::runtime_error("Unknown ALU op");
+        throw std::runtime_error(std::string("Unknown ALU op: ") +
+                                 std::to_string(static_cast<int>(op)));
     }
 
     dut->a = a;
@@ -138,23 +201,34 @@ void check(Valu* dut, uint32_t a, uint32_t b, AluOp op) {
 #include <iomanip>
 #include <iostream>
 
-static const char* to_string(AluOp op) {
+const char* to_string(AluOp op) {
     switch (op) {
-    case AluOp::ALU_ADD:
+    case ALU_ADD:
         return "ADD";
-    case AluOp::ALU_SUB:
+    case ALU_SUB:
         return "SUB";
-    case AluOp::ALU_AND:
+    case ALU_AND:
         return "AND";
-    case AluOp::ALU_OR:
+    case ALU_OR:
         return "OR";
+    case ALU_XOR:
+        return "XOR";
+    case ALU_SLL:
+        return "SLL";
+    case ALU_SRL:
+        return "SRL";
+    case ALU_SRA:
+        return "SRA";
+    case ALU_SLT:
+        return "SLT";
+    case ALU_SLTU:
+        return "SLTU";
     }
 
     return "UNKNOWN";
 }
 
-static void fail(AluOp op, uint32_t a, uint32_t b, const char* field, uint32_t expected,
-                 uint32_t actual) {
+void fail(AluOp op, uint32_t a, uint32_t b, const char* field, uint32_t expected, uint32_t actual) {
     std::cerr << "\nFAIL\n"
               << "op       = " << to_string(op) << '\n'
               << "a        = 0x" << std::hex << std::setw(8) << std::setfill('0') << a << '\n'
