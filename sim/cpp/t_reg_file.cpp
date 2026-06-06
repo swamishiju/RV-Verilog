@@ -100,17 +100,14 @@ uint32_t read_rs2(Vreg_file* dut, uint8_t rs2) {
 
 void fail(const Vreg_file* dut, const char* test, uint8_t rs1, uint8_t rs2, uint8_t rd,
           uint32_t expected, uint32_t actual) {
-    std::cerr << "\n========================================\n"
-              << "TEST FAILED\n"
-              << "========================================\n"
+    std::cerr << "FAIL\n"
               << "test     : " << test << '\n'
               << "sim_time : " << sim_time << '\n'
               << "rs1      : " << unsigned(rs1) << '\n'
               << "rs2      : " << unsigned(rs2) << '\n'
               << "rd       : " << unsigned(rd) << '\n'
               << "expected : 0x" << std::hex << expected << '\n'
-              << "actual   : 0x" << actual << '\n'
-              << "========================================\n";
+              << "actual   : 0x" << actual << '\n';
 
     m_trace->close();
     delete dut;
