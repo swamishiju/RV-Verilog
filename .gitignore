@@ -1,6 +1,12 @@
+# Build artifacts
 build
-compile_commands.json
+
+# Waveforms
 *vcd
+*fst
+
+# Editor generated
+compile_commands.json
 .cache
 .nvim
 .clang-format
