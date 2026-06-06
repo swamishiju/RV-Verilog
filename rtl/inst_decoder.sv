@@ -1,4 +1,5 @@
 `default_nettype none
+import riscv_pkg::alu_op_t;
     
 typedef enum logic [6:0] {
     OPCODE_LOAD      = 7'b0000011,
@@ -21,8 +22,31 @@ typedef enum logic [6:0] {
 
 
 module inst_decoder(
-    input  logic [31:0] instr
+
+    // input  logic        clk,
+
+    input   logic [31:0] instr,
+    output  logic [31:0] instr_o,
+    
+    output  logic        we,
+    output  alu_op_t     alu_op,
+    output  logic [4:0]  rs1,
+    output  logic [4:0]  rs2,
+    output  logic [4:0]  rd
     );
 
-    opcode_t opcode = opcode_t'(instr[6:0]);
+
+    opcode_t opcode;
+    assign opcode = opcode_t'(instr[6:0]);
+    assign instr_o = instr;
+
+    always_comb begin 
+        unique case(opcode)
+        OPCODE_OP: begin
+            
+        end
+        default: begin
+        end
+        endcase
+    end
 endmodule

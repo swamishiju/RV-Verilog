@@ -48,11 +48,11 @@
 * [x] AND
 * [x] OR
 * [x] XOR
-* [ ] SLL
-* [ ] SRL
-* [ ] SRA
-* [ ] SLT
-* [ ] SLTU
+* [x] SLL
+* [x] SRL
+* [x] SRA
+* [x] SLT
+* [x] SLTU
 
 ---
 
