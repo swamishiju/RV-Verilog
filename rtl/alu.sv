@@ -13,7 +13,7 @@ module alu(
     logic [31:0] sum;
     logic        cout;
 
-    assign {cout, sum} = (ALU_Select[0] == 1)? a + ~{1'b1, b} + 1'b1 : a + b;    
+    assign {cout, sum} = (ALU_Select == riscv_pkg::ALU_SUB)? a + ~{1'b1, b} + 1'b1 : a + b;    
 
     always_comb begin
         unique case(ALU_Select) 
@@ -33,8 +33,10 @@ module alu(
 
     assign Z = &~out;
     assign N = out[31];
-    assign C = cout & (ALU_Select == riscv_pkg::ALU_ADD | ALU_Select == riscv_pkg::ALU_SUB);
-    assign V = (~(a[31] ^ b[31] ^ ALU_Select[0])) & 
+    assign C = cout &
+               ((ALU_Select == riscv_pkg::ALU_ADD) |
+               (ALU_Select == riscv_pkg::ALU_SUB));
+    assign V = (~(a[31] ^ b[31] ^ (ALU_Select == riscv_pkg::ALU_SUB))) & 
                (ALU_Select == riscv_pkg::ALU_ADD | ALU_Select == riscv_pkg::ALU_SUB) &
                (a[31] ^ sum[31]);
 

@@ -16,15 +16,15 @@ struct AluResult {
 
 enum AluOp {
     ALU_ADD = 0,
-    ALU_SUB = 1,
-    ALU_AND = 2,
-    ALU_OR = 3,
+    ALU_SLL = 1,
+    ALU_SLT = 2,
+    ALU_SLTU = 3,
     ALU_XOR = 4,
-    ALU_SLL = 5,
-    ALU_SRL = 6,
-    ALU_SRA = 7,
-    ALU_SLT = 8,
-    ALU_SLTU = 9
+    ALU_SRA = 5,
+    ALU_OR = 6,
+    ALU_AND = 7,
+    ALU_SUB = 8,
+    ALU_SRL = 9
 };
 constexpr std::array<AluOp, 10> ALL_ALU_OPS = {
     AluOp::ALU_ADD, AluOp::ALU_SUB, AluOp::ALU_AND, AluOp::ALU_OR,  AluOp::ALU_XOR,
