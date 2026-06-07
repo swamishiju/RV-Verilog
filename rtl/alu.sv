@@ -27,6 +27,8 @@ module alu(
             riscv_pkg::ALU_SRA  : out = $signed(a) >>> b[4:0];
             riscv_pkg::ALU_SLT  : out = ($signed(a) < $signed(b))? 1:0;
             riscv_pkg::ALU_SLTU : out = (a < b)? 1: 0;
+            riscv_pkg::ALU_A    : out = a;
+            riscv_pkg::ALU_B    : out = b;
             default: out = 32'b0;
         endcase
     end
