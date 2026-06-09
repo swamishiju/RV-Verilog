@@ -8,9 +8,7 @@ TB_DIR  := sim/cpp
 OBJ_DIR := build/$(TARGET)
 SIM     := $(OBJ_DIR)/V$(TARGET)
 
-RTL_SRCS := \
-	$(RTL_DIR)/riscv_pkg.sv \
-	$(filter-out $(RTL_DIR)/riscv_pkg.sv,$(shell find $(RTL_DIR) -name "*.sv"))
+RTL_SRCS := $(shell find $(RTL_DIR) -name "*.svh") $(shell find $(RTL_DIR) -name "*.sv")
 TB_SRC   := $(TB_DIR)/t_$(TARGET).cpp
 
 VERILATOR_FLAGS := \

@@ -53,16 +53,16 @@ module inst_decoder(
     );
 
     opcode_t opcode;
-    logic [4:0]  rs1, rs2, rd;
     logic [2:0]  funct3;
     logic [6:0]  funct7;
 
     assign opcode = opcode_t'(instr[6:0]);
-    assign rd = instr[11:7];
     assign funct3 = instr[14:12];
-    assign rs1 = instr[19:15];
-    assign rs2 = instr[24:20];
     assign funct7 = instr[31:25];
+
+    /* verilator lint_off UNUSEDSIGNAL */
+    logic [14:0] unused_ = {instr[11:7], instr[24:15]};
+    /* verilator lint_on UNUSEDSIGNAL */
 
     always_comb begin 
         unique case(opcode)
@@ -74,7 +74,7 @@ module inst_decoder(
             branch      = no;
             branch_inv  = no;
             jump        = no;
-            imm_type_o  = IMM_U;
+            imm_type_o  = riscv_pkg::IMM_U;
 
             pc_src      = riscv_pkg::PC_S_PC;
             res_src     = riscv_pkg::RES_S_ALU;
@@ -91,8 +91,7 @@ module inst_decoder(
             branch      = no;
             branch_inv  = no;
             jump        = no;
-            lui         = no;
-            imm_type_o  = IMM_U;
+            imm_type_o  = riscv_pkg::IMM_U;
 
             pc_src      = riscv_pkg::PC_S_PC;
             res_src     = riscv_pkg::RES_S_ALU;
@@ -108,8 +107,9 @@ module inst_decoder(
 
             // jump signal is active, pc_new = pc+offset
             branch      = no;
+            branch_inv  = no;
             jump        = yes;
-            imm_type_o  = IMM_J;
+            imm_type_o  = riscv_pkg::IMM_J;
 
             pc_src      = riscv_pkg::PC_S_REG;
             res_src     = riscv_pkg::RES_S_ALU;
@@ -128,7 +128,7 @@ module inst_decoder(
             branch      = no;
             branch_inv  = no;
             jump        = yes;
-            imm_type_o  = IMM_I;
+            imm_type_o  = riscv_pkg::IMM_I;
 
             pc_src      = riscv_pkg::PC_S_REG;
             res_src     = riscv_pkg::RES_S_ALU;
@@ -146,16 +146,16 @@ module inst_decoder(
             // jump signal is active and pc source is reg, pc_new = rs1+offset
             branch      = yes;
             jump        = yes;
-            imm_type_o  = IMM_B;
+            imm_type_o  = riscv_pkg::IMM_B;
 
             unique case(funct3) 
-            000: {branch_inv, alu_op} = {no, riscv_pkg::ALU_XOR};   // BEQ
-            001: {branch_inv, alu_op} = {yes, riscv_pkg::ALU_XOR};  // BNE
-            100: {branch_inv, alu_op} = {no, riscv_pkg::ALU_SLT};   // BLT
-            101: {branch_inv, alu_op} = {yes, riscv_pkg::ALU_SLT};  // BGE
-            110: {branch_inv, alu_op} = {no, riscv_pkg::ALU_SLTU};  // BLTU
-            101: {branch_inv, alu_op} = {yes, riscv_pkg::ALU_SLTU}; // BGEU
-            default: begin end
+            3'b000: {branch_inv, alu_op} = {no, riscv_pkg::ALU_XOR};   // BEQ
+            3'b001: {branch_inv, alu_op} = {yes, riscv_pkg::ALU_XOR};  // BNE
+            3'b100: {branch_inv, alu_op} = {no, riscv_pkg::ALU_SLT};   // BLT
+            3'b101: {branch_inv, alu_op} = {yes, riscv_pkg::ALU_SLT};  // BGE
+            3'b110: {branch_inv, alu_op} = {no, riscv_pkg::ALU_SLTU};  // BLTU
+            3'b111: {branch_inv, alu_op} = {yes, riscv_pkg::ALU_SLTU}; // BGEU
+            default: {jump, branch, branch_inv, alu_op} = {no, no, no, riscv_pkg::ALU_NONE};
             endcase
 
             pc_src      = riscv_pkg::PC_S_PC;
@@ -166,29 +166,59 @@ module inst_decoder(
             alu_srcb    = riscv_pkg::ALU_S_REGB;
         end
         OPCODE_OP_IMM: begin
-            reg_write  = 1'b1;
-            mem_write  = 1'b0;
-            pc_src     = riscv_pkg::PC_S_INC;
-            lui        = riscv_pkg::LUI_NO;
-            res_src    = riscv_pkg::RES_S_ALU;
-            alu_src    = riscv_pkg::ALU_S_I;
-            alu_op     = alu_op_t'(funct3);
-            imm_type_o = IMM_I;
+            reg_write   = yes;
+            mem_write   = no;
+            mem_read    = no;
+
+            branch      = no;
+            branch_inv  = no;
+            jump        = no;
+            imm_type_o  = riscv_pkg::IMM_I;
+
+            pc_src      = riscv_pkg::PC_S_PC;
+            res_src     = riscv_pkg::RES_S_ALU;
+
+            alu_op      = alu_op_t'(funct3);
+            alu_srca    = riscv_pkg::ALU_S_REGA;
+            alu_srcb    = riscv_pkg::ALU_S_IMM;
         end
         OPCODE_OP: begin
-            reg_write  = 1'b1;
-            mem_write  = 1'b0;
-            pc_src     = riscv_pkg::PC_S_INC;
-            lui        = riscv_pkg::LUI_NO;
-            res_src    = riscv_pkg::RES_S_ALU;
-            alu_src    = riscv_pkg::ALU_S_R;
+            reg_write   = yes;
+            mem_write   = no;
+            mem_read    = no;
+
+            branch      = no;
+            branch_inv  = no;
+            jump        = no;
+            imm_type_o  = riscv_pkg::IMM_NONE;
+
+            pc_src      = riscv_pkg::PC_S_PC;
+            res_src     = riscv_pkg::RES_S_ALU;
 
             if (funct3 != 3'h0) alu_op = alu_op_t'(funct3);
             else alu_op = (funct7 == 7'h20)? riscv_pkg::ALU_SUB : riscv_pkg::ALU_ADD;
-            
-            imm_type_o = IMM_NONE;
+
+            alu_srca    = riscv_pkg::ALU_S_REGA;
+            alu_srcb    = riscv_pkg::ALU_S_IMM;
+
         end
-        default: begin end
+        default: begin
+            reg_write   = no;
+            mem_write   = no;
+            mem_read    = no;
+
+            branch      = no;
+            branch_inv  = no;
+            jump        = no;
+            imm_type_o  = riscv_pkg::IMM_U;
+
+            pc_src      = riscv_pkg::PC_S_PC;
+            res_src     = riscv_pkg::RES_S_ALU;
+
+            alu_op      = riscv_pkg::ALU_B;
+            alu_srca    = riscv_pkg::ALU_S_REGA;
+            alu_srcb    = riscv_pkg::ALU_S_IMM;
+        end
         endcase
     end
 endmodule
