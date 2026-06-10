@@ -19,13 +19,12 @@ vluint64_t sim_time = 0;
 void tick(Vcore_top* dut);
 int main(int argc, char** argv) {
     auto dut = new Vcore_top;
-    dut->instr = 0x06438313;
     tick(dut);
-    std::cout << (int)dut->alu_op << " " << (int)dut->imm_gen_o << " " << (int)dut->alu_out << "\n";
-
-    dut->instr = 0x06430313;
+    std::cout << dut->pc_ << " " << dut->alu_out << " " << dut->instr << "\n";
     tick(dut);
-    std::cout << (int)dut->alu_op << " " << (int)dut->imm_gen_o << " " << (int)dut->alu_out << "\n";
+    std::cout << dut->pc_ << " " << dut->alu_out << " " << dut->instr << "\n";
+    tick(dut);
+    std::cout << dut->pc_ << " " << dut->alu_out << " " << dut->instr << "\n";
 
     delete dut;
 

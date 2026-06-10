@@ -1,16 +1,15 @@
 `default_nettype none
 
 module core_top(
-    input logic clk,
-    input logic [31:0] instr,
+    input  logic clk,
+    output logic [31:0] instr,
     output logic [31:0] alu_out,
-    output logic [31:0] imm_gen_o,
-    output alu_op_t alu_op
+    output logic [31:0] pc_
     );
 
     import riscv_pkg::*;
-    logic [31:0] pc_next, pc_;
-    // logic [31:0] imm_gen_o;
+    logic [31:0] pc_next; //, pc_;
+    logic [31:0] imm_gen_o;
     // logic [31:0] instr;
 
     logic        we;
@@ -25,7 +24,7 @@ module core_top(
     res_src_t    res_src;
     imm_type_t   imm_type_o;
 
-    // alu_op_t     alu_op;
+    alu_op_t     alu_op;
     alu_srca_t   alu_srca;
     alu_srcb_t   alu_srcb;
     logic alu_z;
@@ -47,6 +46,12 @@ module core_top(
         .jump(jump), .branch(branch), .branch_inv(branch_inv), .alu_z(alu_z),
         .pc_src(pc_src), .pc(pc_), .rd1(rd1), .offset(imm_gen_o), .pc_next(pc_next)
     );
+
+    inst_mem instruction_memory(
+        .addr(pc_),
+        .instr(instr)
+    );
+
 
     reg_file register_file (
         .clk(clk), .rst(1'b0),
